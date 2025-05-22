@@ -1,0 +1,29 @@
+version: "3.9"  # Specify the Docker Compose version
+
+services:
+  app:
+    build:
+      context: .
+    container_name: sweaters-fastapi
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis  # Wait for Redis to be available before starting
+    env_file:
+      - .env
+    volumes:
+      - .:/app  # Mount the current directory into the container
+      - ./assets:/app/assets  # Mount the assets directory for static files
+      - ./locales:/app/locales  # Mount locales for translations
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload  # Command to run FastAPI
+
+  redis:
+    image: redis:7  # Use the latest stable Redis image
+    container_name: redis
+    ports:
+      - "6379:6379"  # Expose Redis on its default port
+    volumes:
+      - redis-data:/data  # Persist Redis data locally
+
+volumes:
+  redis-data:  # Named volume for Redis data persistence
